@@ -6,4 +6,12 @@ const login = async ({ username, password }) => {
   return request.data;
 };
 
-export default { login };
+const getStoredUser = () => {
+  const userJSON = window.localStorage.getItem("blogUser");
+  if (userJSON) {
+    return JSON.parse(userJSON);
+  }
+  return null;
+};
+
+export default { login, getStoredUser };
