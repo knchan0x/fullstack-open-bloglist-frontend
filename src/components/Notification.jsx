@@ -1,10 +1,6 @@
-import { useNotificationValue } from "../contexts/NotificationContext";
-
 import "./Notification.css";
 
-const Notification = () => {
-  const message = useNotificationValue();
-
+const Notification = ({ message }) => {
   if (message === null) {
     return null;
   }
