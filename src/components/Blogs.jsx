@@ -1,17 +1,16 @@
 import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 
 import blogService from "../services/blogs";
 
-import Blog from "./Blog";
 import Togglable from "./Togglable";
 import NewBlogForm from "./NewBlogForm";
 
-const BlogList = ({ user, handleNotice }) => {
+const Blogs = ({ user, handleNotice }) => {
   const queryClient = useQueryClient();
   const createMutation = useMutation({ mutationFn: blogService.create });
   const updateMutation = useMutation({ mutationFn: blogService.update });
-  const deleteMutation = useMutation({ mutationFn: blogService.deleteBlog });
 
   const newBlogFormRef = useRef();
 
@@ -51,78 +50,22 @@ const BlogList = ({ user, handleNotice }) => {
     });
   };
 
-  const handleAddLikes = async (updatedBlogObject) => {
-    updateMutation.mutate(updatedBlogObject, {
-      onSuccess: (newBlog) => {
-        const blogs = queryClient.getQueryData(["blogs"]);
-        const blogToUpdate = {
-          ...updatedBlogObject,
-          user: {
-            username: user.username,
-            name: user.name,
-          },
-        };
-        queryClient.setQueryData(
-          ["blogs"],
-          blogs.map((blog) =>
-            blog.id === updatedBlogObject.id ? blogToUpdate : blog
-          )
-        );
-      },
-      onError: (error) => {
-        handleNotice({
-          type: "error",
-          message: `Error: ${error.response.data.error}`,
-        });
-      },
-    });
-  };
-
-  const handleDelete = async (blogId) => {
-    deleteMutation.mutate(blogId, {
-      onSuccess: () => {
-        const blogs = queryClient.getQueryData(["blogs"]);
-        queryClient.setQueryData(
-          ["blogs"],
-          blogs.filter((blog) => blog.id !== blogId)
-        );
-      },
-      onError: (error) => {
-        handleNotice({
-          type: "error",
-          message: `Error: ${error.response.data.error}`,
-        });
-      },
-    });
-  };
-
-  const handleLogout = () => {
-    window.localStorage.removeItem("blogUser");
-    window.location.reload();
-  };
-
   return (
     <div>
-      <p>
-        {user.name} logged in
-        <button onClick={handleLogout}>logout</button>
-      </p>
       <Togglable buttonLabel="create" ref={newBlogFormRef}>
         <NewBlogForm handleCreate={handleCreateBlog} />
       </Togglable>
       {blogs
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <Blog
-            key={blog.id}
-            user={user}
-            blog={blog}
-            handleAddLikes={handleAddLikes}
-            handleDelete={handleDelete}
-          />
+          <p key={blog.id}>
+            <Link to={`/blogs/${blog.id}`}>
+              {blog.title} {blog.author}
+            </Link>
+          </p>
         ))}
     </div>
   );
 };
 
-export default BlogList;
+export default Blogs;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button, TextInput, Stack, Space } from "@mantine/core";
 
 const NewBlogForm = ({ handleCreate }) => {
   const [title, setTitle] = useState("");
@@ -14,10 +15,10 @@ const NewBlogForm = ({ handleCreate }) => {
   };
 
   return (
-    <form onSubmit={create}>
-      <div>
-        title
-        <input
+    <Stack align="flex-start">
+      <form onSubmit={create}>
+        <TextInput
+          label="Title"
           id="input-title"
           type="text"
           value={title}
@@ -25,10 +26,9 @@ const NewBlogForm = ({ handleCreate }) => {
           placeholder="write blog title here"
           onChange={({ target }) => setTitle(target.value)}
         />
-      </div>
-      <div>
-        author
-        <input
+        <Space h="md" />
+        <TextInput
+          label="Author"
           id="input-author"
           type="text"
           value={author}
@@ -36,10 +36,9 @@ const NewBlogForm = ({ handleCreate }) => {
           placeholder="write blog author here"
           onChange={({ target }) => setAuthor(target.value)}
         />
-      </div>
-      <div>
-        url
-        <input
+        <Space h="md" />
+        <TextInput
+          label="URL"
           id="input-url"
           type="text"
           value={url}
@@ -47,9 +46,12 @@ const NewBlogForm = ({ handleCreate }) => {
           placeholder="input blog url here"
           onChange={({ target }) => setUrl(target.value)}
         />
-      </div>
-      <button id="create-button" type="submit">create</button>
-    </form>
+        <Space h="md" />
+        <Button id="create-button" type="submit">
+          create
+        </Button>
+      </form>
+    </Stack>
   );
 };
 

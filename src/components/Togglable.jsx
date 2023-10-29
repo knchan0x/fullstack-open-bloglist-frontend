@@ -1,4 +1,5 @@
 import { useState, forwardRef, useImperativeHandle } from "react";
+import { Button, Space } from "@mantine/core";
 import PropTypes from "prop-types";
 
 const Togglable = forwardRef((props, refs) => {
@@ -20,11 +21,15 @@ const Togglable = forwardRef((props, refs) => {
   return (
     <div>
       <div style={hideWhenVisible}>
-        <button onClick={toggleVisibility}>{props.buttonLabel}</button>
+        <Space h="md" />
+        <Button onClick={toggleVisibility}>{props.buttonLabel}</Button>
       </div>
       <div style={showWhenVisible}>
         {props.children}
-        <button onClick={toggleVisibility}>cancel</button>
+        <Space h="md" />
+        <Button color="gray" onClick={toggleVisibility}>
+          cancel
+        </Button>
       </div>
     </div>
   );

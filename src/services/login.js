@@ -14,4 +14,12 @@ const getStoredUser = () => {
   return null;
 };
 
-export default { login, getStoredUser };
+let token = null;
+
+const setToken = (newToken) => {
+  token = `Bearer ${newToken}`;
+};
+
+const getToken = () => token;
+
+export default { login, getStoredUser, setToken, getToken };

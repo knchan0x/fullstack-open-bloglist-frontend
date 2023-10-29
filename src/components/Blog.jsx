@@ -1,50 +1,130 @@
+import { useParams } from "react-router-dom";
 import { useState } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
-const Blog = ({ user, blog, handleAddLikes, handleDelete }) => {
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: "solid",
-    borderWidth: 1,
-    marginBottom: 5,
-  };
+import blogService from "../services/blogs";
 
-  const [visible, setVisible] = useState(false);
+const Blog = ({ handleNotice }) => {
+  const id = useParams().id;
+  const [comment, setComment] = useState("");
 
-  const showWhenVisible = { display: visible ? "" : "none" };
+  const queryClient = useQueryClient();
+  const updateMutation = useMutation({ mutationFn: blogService.update });
+  const addCommentMutation = useMutation({
+    mutationFn: blogService.addComment,
+  });
 
-  const toggleVisibility = () => {
-    setVisible(!visible);
-  };
+  const blogsResult = useQuery({
+    queryKey: ["blogs"],
+    queryFn: blogService.getAll,
+  });
 
-  const addLikes = () => {
-    handleAddLikes({
+  if (blogsResult.isLoading) {
+    return <div>loading data...</div>;
+  }
+
+  if (blogsResult.isError) {
+    return <div>blog service not available due to problems in server</div>;
+  }
+
+  const blogs = blogsResult.data;
+
+  if (!blogs || blogs.length === 0) {
+    return null;
+  }
+
+  const blog = blogs.find((blog) => blog.id === id);
+
+  if (!blog) {
+    return null;
+  }
+
+  const handleAddLikes = () => {
+    const updatedBlogObject = {
       ...blog,
       likes: blog.likes + 1,
+    };
+
+    updateMutation.mutate(updatedBlogObject, {
+      onSuccess: (newBlog) => {
+        const blogs = queryClient.getQueryData(["blogs"]);
+        queryClient.setQueryData(
+          ["blogs"],
+          blogs.map((blog) =>
+            blog.id === updatedBlogObject.id ? updatedBlogObject : blog
+          )
+        );
+      },
+      onError: (error) => {
+        handleNotice({
+          type: "error",
+          message: `Error: ${error.response.data.error}`,
+        });
+      },
     });
   };
 
-  const deleteBlog = () => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      handleDelete(blog.id);
+  const handleAddComment = (e) => {
+    e.preventDefault();
+    if (comment !== "") {
+      const blogId = blog.id;
+      addCommentMutation.mutate(
+        { blogId, comment },
+        {
+          onSuccess: (newBlog) => {
+            const blogs = queryClient.getQueryData(["blogs"]);
+            queryClient.setQueryData(
+              ["blogs"],
+              blogs.map((blog) =>
+                blog.id === blogId
+                  ? {
+                    ...blog,
+                    comments: blog.comments.concat(comment),
+                  }
+                  : blog
+              )
+            );
+          },
+          onError: (error) => {
+            handleNotice({
+              type: "error",
+              message: `Error: ${error.response.data.error}`,
+            });
+          },
+        }
+      );
     }
   };
 
   return (
-    <div className="blog" style={blogStyle}>
-      <p>
+    <div>
+      <h2>
         {blog.title} {blog.author}
-        <button onClick={toggleVisibility}>{visible ? "hide" : "view"}</button>
-      </p>
-      <div className="blog-detail" style={showWhenVisible}>
-        <p>{blog.url}</p>
+      </h2>
+      <div>
+        <a href={blog.url}>{blog.url}</a>
         <p>
           likes {blog.likes}
-          <button id="add-like-button" onClick={addLikes}>like</button>
+          <button id="add-like-button" onClick={handleAddLikes}>
+            like
+          </button>
         </p>
-        <p>{blog.user.name}</p>
-        {blog.user.username === user.username && <button id="delete-button" onClick={deleteBlog}>remove</button> }
+        <p>added by {blog.user.name}</p>
       </div>
+      <h3>comments</h3>
+      <form onSubmit={handleAddComment}>
+        <input
+          type="text"
+          value={comment}
+          onChange={({ target }) => setComment(target.value)}
+        />
+        <button type="submit">add comment</button>
+      </form>
+      <ul>
+        {blog.comments.map((comment) => (
+          <li key={comment}>{comment}</li>
+        ))}
+      </ul>
     </div>
   );
 };
