@@ -1,16 +1,13 @@
-import { Routes, Route, Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useNotificationDispatch } from "./contexts/NotificationContext";
 
 import LoginForm from "./components/LoginForm";
 import Togglable from "./components/Togglable";
-import Blogs from "./components/Blogs";
-import Blog from "./components/Blog";
-import Users from "./components/Users";
-import User from "./components/User";
-import Header from "./components/Header";
+import Notification from "./components/Notification";
+import BlogList from "./components/Blogs";
 
+import blogService from "./services/blogs";
 import loginService from "./services/login";
 
 const App = () => {
@@ -31,7 +28,7 @@ const App = () => {
   const user = userResult.data;
 
   if (user) {
-    loginService.setToken(user.token);
+    blogService.setToken(user.token);
   }
 
   const newNotice = (msgObject) => {
@@ -50,8 +47,7 @@ const App = () => {
     loginMutation.mutate(userObject, {
       onSuccess: (user) => {
         queryClient.setQueryData(["user"], user);
-        loginService.setToken(user.token);
-        window.localStorage.setItem("blogUser", JSON.stringify(user));
+        blogService.setToken(user.token);
       },
       onError: (error) => {
         newNotice({
@@ -72,41 +68,13 @@ const App = () => {
 
   return (
     <div>
-      <Header user={user} />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            user ? (
-              <Blogs user={user} handleNotice={newNotice} />
-            ) : (
-              <Navigate replace to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/login"
-          element={user ? <Navigate replace to="/" /> : loginForm()}
-        />
-        <Route
-          path="/blogs/:id"
-          element={
-            user ? (
-              <Blog handleNotice={newNotice} />
-            ) : (
-              <Navigate replace to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/users"
-          element={user ? <Users /> : <Navigate replace to="/login" />}
-        />
-        <Route
-          path="/users/:id"
-          element={user ? <User /> : <Navigate replace to="/login" />}
-        />
-      </Routes>
+      <h1>{user === null ? "log in to the application" : "blogs"}</h1>
+      <Notification />
+      {user === null ? (
+        loginForm()
+      ) : (
+        <BlogList user={user} handleNotice={newNotice} />
+      )}
     </div>
   );
 };

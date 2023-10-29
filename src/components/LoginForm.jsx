@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Stack, Button, TextInput, PasswordInput, Space } from "@mantine/core";
 
 const LoginForm = ({ handleLogin }) => {
   const [username, setUsername] = useState("");
@@ -16,33 +15,31 @@ const LoginForm = ({ handleLogin }) => {
   };
 
   return (
-    <Stack align="flex-start">
+    <div>
       <form onSubmit={login}>
-        <TextInput
-          label="Username"
-          variant="filled"
-          id="username"
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-        <Space h="md" />
-        <PasswordInput
-          label="Password"
-          variant="filled"
-          id="password"
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-        <Space h="md" />
-        <Button id="login-button" type="submit">
-          login
-        </Button>
+        <div>
+          username
+          <input
+            id="username"
+            type="text"
+            value={username}
+            name="Username"
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </div>
+        <div>
+          password
+          <input
+            id="password"
+            type="password"
+            value={password}
+            name="Password"
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </div>
+        <button id="login-button" type="submit">login</button>
       </form>
-    </Stack>
+    </div>
   );
 };
 
